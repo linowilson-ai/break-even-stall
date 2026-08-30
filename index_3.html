@@ -1,0 +1,1137 @@
+<title>The Break-Even Stall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Karla:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3ECD9;
+    --paper-alt:#EAE1C6;
+    --paper-alt-2:#E2D7B8;
+    --ink:#2A2620;
+    --ink-soft:#6B6250;
+    --ledger:#1E5B45;
+    --ledger-soft:#DCE9E1;
+    --brass:#A5711F;
+    --brass-strong:#8C5E19;
+    --alert:#9A3226;
+    --alert-soft:#F3DCD6;
+    --line:#CBBD93;
+    --shadow: rgba(42,38,32,0.28);
+    --desk:#0F241D;
+    --display-bg:#132019;
+    --display-fg:#EFC873;
+    --display-fg-dim:#5C6B60;
+    --focus:#2E6BB8;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#1B1812;
+      --paper-alt:#242019;
+      --paper-alt-2:#2C2620;
+      --ink:#ECE3CC;
+      --ink-soft:#B6A98A;
+      --ledger:#57B78D;
+      --ledger-soft:#1E332A;
+      --brass:#E3A94C;
+      --brass-strong:#F0BE6C;
+      --alert:#E2806A;
+      --alert-soft:#3B241F;
+      --line:#453D28;
+      --shadow: rgba(0,0,0,0.55);
+      --desk:#08130F;
+      --focus:#6FA6E8;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#1B1812;
+    --paper-alt:#242019;
+    --paper-alt-2:#2C2620;
+    --ink:#ECE3CC;
+    --ink-soft:#B6A98A;
+    --ledger:#57B78D;
+    --ledger-soft:#1E332A;
+    --brass:#E3A94C;
+    --brass-strong:#F0BE6C;
+    --alert:#E2806A;
+    --alert-soft:#3B241F;
+    --line:#453D28;
+    --shadow: rgba(0,0,0,0.55);
+    --desk:#08130F;
+    --focus:#6FA6E8;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--desk);
+    background-image: radial-gradient(ellipse at 50% -10%, color-mix(in srgb, var(--ledger) 14%, var(--desk)) 0%, var(--desk) 60%);
+    color:var(--ink);
+    font-family:"Karla", "Trebuchet MS", sans-serif;
+    display:flex;
+    justify-content:center;
+    padding: clamp(14px, 4vw, 48px) clamp(10px, 4vw, 20px) 60px;
+  }
+  h1,h2,h3{ text-wrap:balance; margin:0; }
+  .stamp-font{ font-family:"Special Elite","Courier New",monospace; }
+  .mono, .figure{ font-family:"IBM Plex Mono","SFMono-Regular",Consolas,monospace; font-variant-numeric: tabular-nums; }
+  button{ font-family:inherit; }
+  ::selection{ background: var(--brass); color: var(--desk); }
+  :focus-visible{ outline: 3px solid var(--focus); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+  }
+
+  .book{
+    width:100%;
+    max-width: 760px;
+    position:relative;
+  }
+
+  .letterhead{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:12px;
+    padding: 4px 6px 14px;
+    color: color-mix(in srgb, var(--paper) 82%, transparent);
+  }
+  .letterhead .brand{
+    font-family:"Special Elite","Courier New",monospace;
+    font-size: 15px;
+    letter-spacing: 0.06em;
+    color: color-mix(in srgb, var(--paper) 70%, transparent);
+  }
+  .letterhead .handbook-btn{
+    background:transparent;
+    border:1px solid color-mix(in srgb, var(--paper) 35%, transparent);
+    color: color-mix(in srgb, var(--paper) 78%, transparent);
+    border-radius:999px;
+    padding:6px 14px;
+    font-size:13px;
+    cursor:pointer;
+    letter-spacing:0.02em;
+  }
+  .letterhead .handbook-btn:hover{ border-color: var(--brass); color: var(--brass); }
+
+  .ledger-card{
+    position:relative;
+    background:
+      repeating-linear-gradient(
+        var(--paper) 0px, var(--paper) 33px,
+        var(--line) 33px, var(--line) 34px
+      );
+    background-color:var(--paper);
+    border-radius: 6px;
+    box-shadow: 0 30px 60px -20px var(--shadow), 0 2px 0 var(--paper-alt-2) inset;
+    padding: 30px clamp(18px,5vw,44px) 36px;
+    margin-top: 26px;
+  }
+  .ledger-card::before{
+    content:"";
+    position:absolute;
+    left:0; right:0; top:-9px;
+    height:16px;
+    background-image: linear-gradient(135deg, var(--paper) 50%, transparent 50%), linear-gradient(-135deg, var(--paper) 50%, transparent 50%);
+    background-size: 18px 18px;
+    background-repeat: repeat-x;
+    background-position: bottom left;
+  }
+  .card-margin{
+    position:absolute;
+    top:0; bottom:0; left:0;
+    width: 34px;
+    border-right: 2px solid color-mix(in srgb, var(--alert) 55%, var(--line));
+    opacity:0.5;
+    display:none;
+  }
+  @media (min-width:640px){ .card-margin{ display:block; } }
+
+  .screen{ display:none; }
+  .screen.active{ display:block; animation: rise 0.35s ease both; }
+  @keyframes rise{ from{ opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .eyebrow{
+    font-family:"Special Elite","Courier New",monospace;
+    font-size:12.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--brass-strong);
+    margin:0 0 6px;
+  }
+  h1.title{
+    font-family:"Special Elite","Courier New",monospace;
+    font-size: clamp(24px, 5.4vw, 34px);
+    line-height:1.15;
+    color:var(--ink);
+    margin-bottom:10px;
+  }
+  p.lede{
+    color:var(--ink-soft);
+    font-size:15.5px;
+    line-height:1.55;
+    max-width: 60ch;
+    margin: 0 0 20px;
+  }
+
+  label.field-label{
+    display:block;
+    font-size:12.5px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color: var(--ink-soft);
+    margin-bottom:6px;
+  }
+  input[type="text"]{
+    width:100%;
+    font-family:"IBM Plex Mono", monospace;
+    font-size:16px;
+    padding:11px 12px;
+    border-radius:4px;
+    border:1.5px solid var(--line);
+    background: var(--paper-alt);
+    color:var(--ink);
+  }
+  input[type="text"]::placeholder{ color: color-mix(in srgb, var(--ink-soft) 70%, transparent); }
+
+  .field{ margin-bottom:16px; }
+  .field-row{ display:flex; gap:14px; flex-wrap:wrap; }
+  .field-row .field{ flex:1 1 200px; }
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    border:none;
+    border-radius:4px;
+    padding:12px 22px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    background: var(--ledger);
+    color: var(--ledger-soft);
+    box-shadow: 0 1px 0 color-mix(in srgb, black 20%, transparent) inset, 0 6px 14px -8px var(--shadow);
+  }
+  .btn:hover{ filter:brightness(1.07); }
+  .btn:active{ transform: translateY(1px); }
+  .btn[disabled]{ opacity:0.45; cursor:not-allowed; filter:none; }
+  .btn.secondary{
+    background:transparent;
+    color: var(--ink);
+    border:1.5px solid var(--line);
+    box-shadow:none;
+  }
+  .btn.secondary:hover{ border-color: var(--brass); color:var(--brass-strong); }
+  .btn.wide{ width:100%; }
+
+  .error-text{ color:var(--alert); font-size:13.5px; margin-top:8px; min-height:1.2em; }
+
+  .biz-grid{ display:grid; gap:14px; grid-template-columns: 1fr; margin-bottom: 6px; }
+  @media (min-width:560px){ .biz-grid{ grid-template-columns: 1fr 1fr 1fr; } }
+  .biz-card{
+    text-align:left;
+    background: var(--paper-alt);
+    border:1.5px solid var(--line);
+    border-radius:6px;
+    padding:16px;
+    cursor:pointer;
+    display:flex; flex-direction:column; gap:8px;
+    color:var(--ink);
+  }
+  .biz-card:hover{ border-color: var(--brass); }
+  .biz-card .biz-emoji{ font-size:26px; }
+  .biz-card h3{ font-size:16.5px; font-family:"Special Elite","Courier New",monospace; }
+  .biz-card p{ font-size:13px; color:var(--ink-soft); margin:0; line-height:1.5; }
+  .biz-card .biz-stats{ font-size:12px; color:var(--ink-soft); margin-top:auto; padding-top:8px; border-top:1px dashed var(--line); }
+
+  .sheet{
+    background: var(--paper-alt);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:14px 16px;
+    margin: 14px 0;
+  }
+  .sheet h4{
+    font-size:12.5px; text-transform:uppercase; letter-spacing:0.08em;
+    color:var(--ink-soft); margin:0 0 8px;
+  }
+  .price-list{ list-style:none; margin:0; padding:0; display:grid; gap:5px; font-size:14px; }
+  .price-list li{ display:flex; justify-content:space-between; gap:10px; }
+  .price-list .amt{ font-family:"IBM Plex Mono",monospace; }
+  .price-list .hike{ color:var(--alert); font-weight:600; }
+
+  .event-card{
+    background: var(--alert-soft);
+    border:1px solid color-mix(in srgb, var(--alert) 40%, var(--line));
+    border-left: 5px solid var(--alert);
+    border-radius:4px;
+    padding:12px 14px;
+    margin: 16px 0;
+    display:flex; gap:12px; align-items:flex-start;
+  }
+  .event-card .event-icon{ font-size:20px; line-height:1; }
+  .event-card.calm{ background: var(--ledger-soft); border-color: color-mix(in srgb, var(--ledger) 40%, var(--line)); border-left-color: var(--ledger); }
+  .event-card h4{ margin:0 0 3px; font-size:14px; }
+  .event-card p{ margin:0; font-size:13.5px; color:var(--ink-soft); line-height:1.5; }
+
+  .stepper-row{
+    display:flex; align-items:center; gap:12px;
+    background: var(--paper-alt);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:10px 12px;
+  }
+  .stepper-row .step-btn{
+    width:38px; height:38px; border-radius:50%;
+    border:1.5px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+    font-size:19px;
+    font-weight:700;
+    cursor:pointer;
+    line-height:1;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .stepper-row .step-btn:hover{ border-color:var(--brass); color:var(--brass-strong); }
+  .stepper-row .step-val{
+    flex:1;
+    text-align:center;
+    font-family:"IBM Plex Mono",monospace;
+    font-size:22px;
+    font-weight:600;
+  }
+  .stepper-row .step-hint{ font-size:11.5px; color:var(--ink-soft); text-align:center; margin-top:4px; }
+  .stepper-wrap{ margin-bottom:16px; }
+
+  .live-panel{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap:10px;
+    margin: 18px 0;
+  }
+  .live-tile{
+    background: var(--display-bg);
+    border-radius:6px;
+    padding:10px 12px;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--display-fg) 18%, transparent), inset 0 2px 8px rgba(0,0,0,0.5);
+  }
+  .live-tile .lt-label{
+    font-size:10.5px; text-transform:uppercase; letter-spacing:0.09em;
+    color: var(--display-fg-dim); margin-bottom:4px;
+  }
+  .live-tile .lt-value{
+    font-family:"IBM Plex Mono",monospace;
+    color: var(--display-fg);
+    font-size: 19px;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 10px color-mix(in srgb, var(--display-fg) 45%, transparent);
+  }
+  .live-tile.warn .lt-value{ color:#E8917B; text-shadow:0 0 10px rgba(232,145,123,0.5); }
+
+  .receipt{
+    background: var(--paper-alt);
+    border:1px dashed var(--line);
+    border-radius:4px;
+    padding: 16px 18px;
+    font-family:"IBM Plex Mono",monospace;
+    font-size:13.5px;
+  }
+  .receipt .r-line{
+    display:flex; justify-content:space-between; gap:10px;
+    padding:4px 0;
+    opacity:0;
+    animation: reveal 0.4s ease forwards;
+  }
+  @keyframes reveal{ from{opacity:0; transform:translateX(-4px);} to{opacity:1; transform:translateX(0);} }
+  .receipt .r-rule{ border:none; border-top:1px dashed var(--line); margin:8px 0; }
+  .receipt .r-line.total{ font-weight:700; font-size:15px; }
+  .receipt .r-line.sub{ color:var(--ink-soft); font-size:12.5px; }
+  .receipt .r-line.neg .r-amt{ color:var(--alert); }
+  .receipt .r-line.pos .r-amt{ color:var(--ledger); }
+
+  .verdict-badge{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 16px;
+    border-radius:999px;
+    font-family:"Special Elite","Courier New",monospace;
+    font-size:13.5px;
+    letter-spacing:0.03em;
+    margin: 14px 0 4px;
+    border:2px solid currentColor;
+  }
+  .verdict-badge.good{ color:var(--ledger); }
+  .verdict-badge.mid{ color:var(--brass-strong); }
+  .verdict-badge.bad{ color:var(--alert); }
+
+  .note{ font-size:13.5px; color:var(--ink-soft); line-height:1.6; margin:10px 0; }
+  .note strong{ color:var(--ink); }
+
+  .progress-dots{ display:flex; gap:6px; margin: 0 0 16px; }
+  .progress-dots span{ width:8px; height:8px; border-radius:50%; background:var(--line); }
+  .progress-dots span.done{ background:var(--ledger); }
+  .progress-dots span.now{ background:var(--brass); }
+
+  .quiz-opt{
+    display:block; width:100%; text-align:left;
+    background:var(--paper-alt); border:1.5px solid var(--line); border-radius:5px;
+    padding:11px 14px; margin-bottom:8px; cursor:pointer; font-size:14.5px; color:var(--ink);
+  }
+  .quiz-opt:hover{ border-color:var(--brass); }
+  .quiz-opt.correct{ border-color:var(--ledger); background:var(--ledger-soft); }
+  .quiz-opt.incorrect{ border-color:var(--alert); background:var(--alert-soft); }
+  .quiz-opt[disabled]{ cursor:default; }
+  .quiz-feedback{ font-size:13.5px; color:var(--ink-soft); margin-top:10px; line-height:1.55; }
+
+  .stamp{
+    position:absolute;
+    top:18px; right:8px;
+    width:96px; height:96px;
+    border:3px solid var(--alert);
+    border-radius:50%;
+    color:var(--alert);
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+    font-family:"Special Elite","Courier New",monospace;
+    font-size:13px;
+    letter-spacing:0.05em;
+    transform: rotate(-14deg);
+    opacity:0.9;
+    line-height:1.2;
+    pointer-events:none;
+  }
+  .stamp.good{ border-color:var(--ledger); color:var(--ledger); }
+  .stamp.mid{ border-color:var(--brass-strong); color:var(--brass-strong); }
+
+  .badge-row{ display:flex; align-items:center; gap:16px; margin: 16px 0 18px; flex-wrap:wrap; }
+  .final-score{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:15px;
+    color:var(--ink-soft);
+  }
+  .final-score b{ color:var(--ink); font-size:22px; }
+
+  .glossary{ display:grid; gap:10px; margin: 14px 0 4px; }
+  .glossary .g-item dt{ font-family:"Special Elite","Courier New",monospace; font-size:13px; color:var(--brass-strong); }
+  .glossary .g-item dd{ margin:2px 0 0; font-size:13.5px; color:var(--ink-soft); line-height:1.5; }
+
+  textarea.reflect{
+    width:100%; min-height:90px; resize:vertical;
+    font-family:"Karla",sans-serif; font-size:14.5px;
+    padding:10px 12px; border-radius:5px; border:1.5px solid var(--line);
+    background:var(--paper-alt); color:var(--ink);
+  }
+
+  .btn-row{ display:flex; gap:12px; flex-wrap:wrap; margin-top:20px; }
+
+  .drawer-backdrop{
+    position:fixed; inset:0; background:rgba(0,0,0,0.5);
+    display:none; z-index:20;
+  }
+  .drawer-backdrop.open{ display:block; }
+  .drawer{
+    position:fixed; top:0; right:0; bottom:0;
+    width:min(92vw, 380px);
+    background:var(--paper);
+    box-shadow:-16px 0 40px rgba(0,0,0,0.4);
+    transform:translateX(100%);
+    transition:transform 0.28s ease;
+    z-index:21;
+    padding:22px 22px 30px;
+    overflow-y:auto;
+  }
+  .drawer.open{ transform:translateX(0); }
+  .drawer h2{ font-family:"Special Elite","Courier New",monospace; font-size:19px; margin-bottom:4px; }
+  .drawer .close-btn{
+    position:absolute; top:16px; right:16px;
+    background:transparent; border:none; font-size:20px; cursor:pointer; color:var(--ink-soft);
+  }
+
+  .code-hint{ font-size:12.5px; color:var(--ink-soft); margin-top:-8px; margin-bottom:16px; }
+  .sr-only{ position:absolute; width:1px;height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+</style>
+
+<div class="book">
+  <div class="letterhead">
+    <span class="brand">📒 THE BREAK-EVEN STALL — TRADING LEDGER</span>
+    <button class="handbook-btn" id="handbookOpenBtn" type="button">Manager's Handbook</button>
+  </div>
+
+  <div class="ledger-card">
+    <div class="card-margin" aria-hidden="true"></div>
+
+    <!-- SCREEN: JOIN -->
+    <section class="screen active" id="screen-join">
+      <p class="eyebrow">Clock-in Sheet</p>
+      <h1 class="title">Ready to run a stall?</h1>
+      <p class="lede">You're the manager for a market-day pop-up business. Set your price, decide how much stock to prepare, and find out whether your business is actually <em>financially viable</em> — not just lucky.</p>
+
+      <div class="field">
+        <label class="field-label" for="inputName">Your name</label>
+        <input type="text" id="inputName" placeholder="e.g. Aroha T" maxlength="30" autocomplete="off">
+      </div>
+      <div class="field">
+        <label class="field-label" for="inputCode">Today's class code</label>
+        <input type="text" id="inputCode" placeholder="Ask your teacher" maxlength="20" autocomplete="off">
+      </div>
+      <p class="code-hint" id="codeHint"></p>
+      <p class="error-text" id="joinError"></p>
+      <button class="btn wide" id="joinBtn" type="button">Clock in →</button>
+    </section>
+
+    <!-- SCREEN: BRIEF -->
+    <section class="screen" id="screen-brief">
+      <p class="eyebrow" id="briefGreeting">Welcome</p>
+      <h1 class="title">Choose your stall</h1>
+      <p class="lede">Every business has different fixed costs, ingredient costs and customer demand. Pick one to run for three market days.</p>
+      <div class="biz-grid" id="bizGrid"></div>
+    </section>
+
+    <!-- SCREEN: ROUND -->
+    <section class="screen" id="screen-round">
+      <div class="progress-dots" id="roundDots"></div>
+      <p class="eyebrow" id="roundEyebrow">Market Day 1 of 3</p>
+      <h1 class="title" id="roundTitle">Set today's price and stock</h1>
+
+      <div class="sheet">
+        <h4>This week's supplier price list</h4>
+        <ul class="price-list" id="priceList"></ul>
+      </div>
+
+      <div id="eventSlot"></div>
+
+      <div class="stepper-wrap">
+        <label class="field-label">Selling price</label>
+        <div class="stepper-row">
+          <button class="step-btn" id="priceDown" type="button" aria-label="Lower price">−</button>
+          <div class="step-val mono" id="priceVal">$0.00</div>
+          <button class="step-btn" id="priceUp" type="button" aria-label="Raise price">+</button>
+        </div>
+      </div>
+
+      <div class="stepper-wrap">
+        <label class="field-label">Units to prepare today</label>
+        <div class="stepper-row">
+          <button class="step-btn" id="qtyDown" type="button" aria-label="Prepare fewer">−</button>
+          <div class="step-val mono" id="qtyVal">0</div>
+          <button class="step-btn" id="qtyUp" type="button" aria-label="Prepare more">+</button>
+        </div>
+        <p class="step-hint" id="qtyHint"></p>
+      </div>
+
+      <div class="live-panel">
+        <div class="live-tile">
+          <div class="lt-label">Contribution margin</div>
+          <div class="lt-value" id="liveMargin">$0.00</div>
+        </div>
+        <div class="live-tile" id="liveBETile">
+          <div class="lt-label">Break-even units</div>
+          <div class="lt-value" id="liveBE">—</div>
+        </div>
+      </div>
+
+      <button class="btn wide" id="commitBtn" type="button">Open the stall →</button>
+    </section>
+
+    <!-- SCREEN: RECEIPT -->
+    <section class="screen" id="screen-receipt">
+      <p class="eyebrow" id="receiptEyebrow">End of Trading — Market Day 1</p>
+      <h1 class="title">Today's till roll</h1>
+      <div class="receipt" id="receiptBody"></div>
+      <div id="verdictSlot"></div>
+      <p class="note" id="verdictNote"></p>
+      <button class="btn wide" id="afterReceiptBtn" type="button">Continue →</button>
+    </section>
+
+    <!-- SCREEN: QUIZ -->
+    <section class="screen" id="screen-quiz">
+      <p class="eyebrow">Manager's Quiz</p>
+      <h1 class="title" id="quizQuestion"></h1>
+      <div id="quizOpts"></div>
+      <p class="quiz-feedback" id="quizFeedback"></p>
+      <button class="btn wide" id="quizNextBtn" type="button" style="display:none;">Continue →</button>
+    </section>
+
+    <!-- SCREEN: FINAL -->
+    <section class="screen" id="screen-final">
+      <div class="stamp" id="finalStamp">VIABLE</div>
+      <p class="eyebrow">Three-Day Trading Report</p>
+      <h1 class="title" id="finalTitle">Shift complete</h1>
+      <div class="badge-row">
+        <div class="final-score"><b id="finalScoreNum">0</b> / 500 points</div>
+      </div>
+      <div class="receipt" id="finalSummary"></div>
+      <p class="note" id="finalVerdictText"></p>
+
+      <div class="sheet">
+        <h4>For your reflection</h4>
+        <label class="field-label" for="reflectBox">In 2–3 sentences: was your stall financially viable, and why?</label>
+        <textarea class="reflect" id="reflectBox" placeholder="Type your reflection here — it will be included if you save your results."></textarea>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn secondary" id="saveResultsBtn" type="button">Save my results</button>
+        <button class="btn" id="restartBtn" type="button">Run another shift →</button>
+      </div>
+      <p class="error-text" id="saveError"></p>
+    </section>
+
+  </div>
+</div>
+
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<div class="drawer" id="handbookDrawer" aria-hidden="true">
+  <button class="close-btn" id="handbookCloseBtn" aria-label="Close handbook">✕</button>
+  <h2>Manager's Handbook</h2>
+  <p class="note">Quick definitions — keep this open while you trade.</p>
+  <dl class="glossary">
+    <div class="g-item"><dt>Revenue</dt><dd>The total money coming in from sales: price × units sold. Not the same as profit.</dd></div>
+    <div class="g-item"><dt>Fixed costs</dt><dd>Costs that stay the same no matter how much you sell or make, e.g. stall hire, permits, equipment rental for the day.</dd></div>
+    <div class="g-item"><dt>Variable costs</dt><dd>Costs that rise and fall with how many units you make, e.g. ingredients, packaging — paid on every unit you prepare, sold or not.</dd></div>
+    <div class="g-item"><dt>Contribution margin</dt><dd>Selling price minus variable cost per unit. It's what each sale actually contributes toward covering your fixed costs.</dd></div>
+    <div class="g-item"><dt>Break-even point</dt><dd>The number of units you must sell so total revenue exactly equals total costs — profit is zero. Formula: fixed costs ÷ contribution margin.</dd></div>
+    <div class="g-item"><dt>Margin of safety</dt><dd>How far actual sales are above (or below) the break-even point. A bigger margin means the business can absorb a bad day and stay viable.</dd></div>
+    <div class="g-item"><dt>Forecast vs actual</dt><dd>Your forecast is an educated guess at demand before trading; actual sales can differ once real conditions (weather, competitors, hype) play out.</dd></div>
+    <div class="g-item"><dt>Profit ≠ viability</dt><dd>One profitable day doesn't prove a business is viable. Viability means it can consistently cover its costs, absorb shocks, and keep enough cash to keep operating — not just get lucky once.</dd></div>
+  </dl>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- data ---------- */
+  var BUSINESSES = [
+    {
+      id:"toastie", emoji:"🥪", name:"The Toastie Cart",
+      blurb:"Toasted sandwiches at the lunchtime market.",
+      unit:"toastie", unitPlural:"toasties",
+      fixedCost:50, varCost:2.20,
+      minPrice:3.5, maxPrice:7, priceStep:0.5,
+      basePrice:5, baseQty:40, elasticity:8,
+      qtyStep:5, qtyMax:90,
+      costItem:"Bread, filling & wrap per toastie"
+    },
+    {
+      id:"grip", emoji:"📱", name:"Phone Grip Pop-Up",
+      blurb:"Custom-printed phone grips between classes.",
+      unit:"grip", unitPlural:"grips",
+      fixedCost:35, varCost:3.00,
+      minPrice:5, maxPrice:12, priceStep:0.5,
+      basePrice:8, baseQty:25, elasticity:4,
+      qtyStep:5, qtyMax:60,
+      costItem:"Blank grip & custom print per unit"
+    },
+    {
+      id:"carwash", emoji:"🚗", name:"Wash & Go Car Wash",
+      blurb:"Weekend fundraiser car wash in the car park.",
+      unit:"car", unitPlural:"cars",
+      fixedCost:75, varCost:1.50,
+      minPrice:10, maxPrice:20, priceStep:1,
+      basePrice:15, baseQty:18, elasticity:1.5,
+      qtyStep:2, qtyMax:40,
+      costItem:"Soap, sponges & water per car"
+    }
+  ];
+
+  var EVENTS = [
+    {
+      key:"calm",
+      label:function(biz){ return "Opening day — clear conditions."; },
+      icon:"☀️", calm:true,
+      costMult:1, demandMult:1
+    },
+    {
+      key:"costhike",
+      label:function(biz){
+        var lines = {
+          toastie:"Your bread supplier raises prices — a wheat shortage pushes ingredient costs up 20%.",
+          grip:"Shipping costs jump — your grip supplier raises unit prices by 20%.",
+          carwash:"Council water rates rise — your cost per car is up 20% this week."
+        };
+        return lines[biz.id];
+      },
+      icon:"📈", calm:false,
+      costMult:1.2, demandMult:1
+    },
+    {
+      key:"demandshock",
+      label:function(biz){
+        var lines = {
+          toastie:"Heavy rain on market day — foot traffic is well down.",
+          grip:"A ka-fuffle at the gate has half the school running late — fewer customers stop by.",
+          carwash:"An overnight downpour left the car park flooded — turnout is well down."
+        };
+        return lines[biz.id];
+      },
+      icon:"🌧️", calm:false,
+      costMult:1, demandMult:0.62
+    }
+  ];
+
+  var QUIZZES = [
+    {
+      q:"Which of these counts as a FIXED cost for a market-day stall?",
+      opts:["Bread and filling for each toastie", "The daily cart hire fee", "Wrapping paper used per item", "Sauce sachets per customer"],
+      correct:1,
+      explain:"Fixed costs don't change with how much you sell — the cart hire is due whether you sell 5 toasties or 50. Bread, wrapping and sauce all scale with each sale, so they're variable costs."
+    },
+    {
+      q:"A stall's contribution margin is $3 per unit and fixed costs are $90. It sells 40 units today. What's its margin of safety?",
+      opts:["40 units", "30 units", "10 units", "130 units"],
+      correct:2,
+      explain:"Break-even = fixed costs ÷ contribution margin = $90 ÷ $3 = 30 units. Margin of safety = actual sales − break-even = 40 − 30 = 10 units."
+    }
+  ];
+
+  var TOTAL_ROUNDS = 3;
+
+  /* ---------- state ---------- */
+  var state = {
+    name:"", classCode:"",
+    biz:null,
+    round:0,
+    price:0,
+    qty:0,
+    scores:[],
+    roundResults:[],
+    quizIndex:0,
+    quizScore:0,
+    pendingAfterQuiz:null
+  };
+
+  /* ---------- helpers ---------- */
+  function $(id){ return document.getElementById(id); }
+  function money(n){
+    var neg = n < 0;
+    var v = Math.abs(n).toFixed(2);
+    return (neg ? "-$" : "$") + v;
+  }
+  function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+  function showScreen(id){
+    var screens = document.querySelectorAll(".screen");
+    for (var i=0;i<screens.length;i++){ screens[i].classList.remove("active"); }
+    $(id).classList.add("active");
+    window.scrollTo({top:0, behavior:"instant" in window.performance ? "instant" : "auto"});
+  }
+
+  function currentEvent(){ return EVENTS[state.round]; }
+
+  function forecastQty(biz, price, event){
+    var q = biz.baseQty - biz.elasticity * (price - biz.basePrice);
+    q = q * event.demandMult;
+    return Math.max(0, Math.round(q));
+  }
+
+  function effectiveVarCost(biz, event){
+    return biz.varCost * event.costMult;
+  }
+
+  function contributionMargin(biz, price, event){
+    return price - effectiveVarCost(biz, event);
+  }
+
+  function breakEvenUnits(biz, price, event){
+    var cm = contributionMargin(biz, price, event);
+    if (cm <= 0) return null;
+    return Math.ceil(biz.fixedCost / cm);
+  }
+
+  /* ---------- join screen ---------- */
+  (function initJoin(){
+    var params = new URLSearchParams(window.location.search);
+    var urlCode = params.get("code");
+    if (urlCode){
+      $("codeHint").textContent = "Type the code your teacher has shared for today's session.";
+    } else {
+      $("codeHint").textContent = "No class session code set for this link — any code will do.";
+    }
+    $("joinBtn").addEventListener("click", function(){
+      var name = $("inputName").value.trim();
+      var code = $("inputCode").value.trim();
+      $("joinError").textContent = "";
+      if (!name){ $("joinError").textContent = "Enter your name to clock in."; return; }
+      if (!code){ $("joinError").textContent = "Enter today's class code."; return; }
+      if (urlCode && code.toLowerCase() !== urlCode.toLowerCase()){
+        $("joinError").textContent = "That code doesn't match today's session — check with your teacher.";
+        return;
+      }
+      state.name = name;
+      state.classCode = code;
+      $("briefGreeting").textContent = "Welcome, " + name;
+      renderBizGrid();
+      showScreen("screen-brief");
+    });
+  })();
+
+  /* ---------- brief screen ---------- */
+  function renderBizGrid(){
+    var grid = $("bizGrid");
+    grid.innerHTML = "";
+    BUSINESSES.forEach(function(biz){
+      var card = document.createElement("button");
+      card.type = "button";
+      card.className = "biz-card";
+      card.innerHTML =
+        '<div class="biz-emoji">'+biz.emoji+'</div>' +
+        '<h3>'+biz.name+'</h3>' +
+        '<p>'+biz.blurb+'</p>' +
+        '<div class="biz-stats mono">Fixed '+money(biz.fixedCost)+' · Cost/unit '+money(biz.varCost)+'</div>';
+      card.addEventListener("click", function(){ startBusiness(biz); });
+      grid.appendChild(card);
+    });
+  }
+
+  function startBusiness(biz){
+    state.biz = biz;
+    state.round = 0;
+    state.scores = [];
+    state.roundResults = [];
+    state.quizIndex = 0;
+    state.quizScore = 0;
+    state.price = biz.basePrice;
+    state.qty = biz.baseQty;
+    setupRound();
+    showScreen("screen-round");
+  }
+
+  /* ---------- round screen ---------- */
+  function setupRound(){
+    var biz = state.biz;
+    var event = currentEvent();
+
+    var dots = $("roundDots");
+    dots.innerHTML = "";
+    for (var i=0;i<TOTAL_ROUNDS;i++){
+      var d = document.createElement("span");
+      d.className = i < state.round ? "done" : (i === state.round ? "now" : "");
+      dots.appendChild(d);
+    }
+
+    $("roundEyebrow").textContent = "Market Day " + (state.round+1) + " of " + TOTAL_ROUNDS + " — " + biz.name;
+    $("roundTitle").textContent = state.round === 0 ? "Set today's price and stock" : "Adjust your plan for today";
+
+    var vc = effectiveVarCost(biz, event);
+    var priceListHtml =
+      '<li><span>Fixed costs (stall hire, permit)</span><span class="amt">'+money(biz.fixedCost)+'</span></li>' +
+      '<li><span>'+biz.costItem+'</span><span class="amt'+(event.costMult>1?' hike':'')+'">'+money(vc)+(event.costMult>1?' (was '+money(biz.varCost)+')':'')+'</span></li>';
+    $("priceList").innerHTML = priceListHtml;
+
+    var eventSlot = $("eventSlot");
+    if (event.calm){
+      eventSlot.innerHTML =
+        '<div class="event-card calm"><div class="event-icon">'+event.icon+'</div><div><h4>'+event.label(biz)+'</h4><p>Normal trading conditions — use this day to find a solid starting price.</p></div></div>';
+    } else {
+      eventSlot.innerHTML =
+        '<div class="event-card"><div class="event-icon">'+event.icon+'</div><div><h4>Market update</h4><p>'+event.label(biz)+'</p></div></div>';
+    }
+
+    state.price = clamp(state.price, biz.minPrice, biz.maxPrice);
+    updatePriceDisplay();
+    updateQtyDisplay();
+
+    $("commitBtn").onclick = commitRound;
+  }
+
+  function updatePriceDisplay(){
+    var biz = state.biz;
+    $("priceVal").textContent = money(state.price);
+    updateLiveTiles();
+  }
+  function updateQtyDisplay(){
+    var biz = state.biz;
+    var event = currentEvent();
+    var fq = forecastQty(biz, state.price, event);
+    $("qtyVal").textContent = state.qty + " " + (state.qty===1?biz.unit:biz.unitPlural);
+    $("qtyHint").textContent = "Forecast customers today: ~" + fq + " " + (fq===1?biz.unit:biz.unitPlural) + " (actual may vary once you open)";
+    updateLiveTiles();
+  }
+  function updateLiveTiles(){
+    var biz = state.biz;
+    var event = currentEvent();
+    var cm = contributionMargin(biz, state.price, event);
+    $("liveMargin").textContent = money(cm);
+    var be = breakEvenUnits(biz, state.price, event);
+    var beTile = $("liveBETile");
+    if (be === null){
+      $("liveBE").textContent = "Never";
+      beTile.classList.add("warn");
+    } else {
+      $("liveBE").textContent = be + " " + (be===1?biz.unit:biz.unitPlural);
+      beTile.classList.remove("warn");
+    }
+  }
+
+  $("priceUp").addEventListener("click", function(){
+    var biz = state.biz;
+    state.price = clamp(+(state.price + biz.priceStep).toFixed(2), biz.minPrice, biz.maxPrice);
+    updatePriceDisplay(); updateQtyDisplay();
+  });
+  $("priceDown").addEventListener("click", function(){
+    var biz = state.biz;
+    state.price = clamp(+(state.price - biz.priceStep).toFixed(2), biz.minPrice, biz.maxPrice);
+    updatePriceDisplay(); updateQtyDisplay();
+  });
+  $("qtyUp").addEventListener("click", function(){
+    var biz = state.biz;
+    state.qty = clamp(state.qty + biz.qtyStep, 0, biz.qtyMax);
+    updateQtyDisplay();
+  });
+  $("qtyDown").addEventListener("click", function(){
+    var biz = state.biz;
+    state.qty = clamp(state.qty - biz.qtyStep, 0, biz.qtyMax);
+    updateQtyDisplay();
+  });
+
+  function commitRound(){
+    var biz = state.biz;
+    var event = currentEvent();
+    var price = state.price;
+    var unitsPrepared = state.qty;
+
+    var fq = forecastQty(biz, price, event);
+    var noise = (Math.random() * 0.2) - 0.1; // +/-10%
+    var actualQty = Math.max(0, Math.round(fq * (1 + noise)));
+    var unitsSold = Math.min(unitsPrepared, actualQty);
+    var wasted = Math.max(0, unitsPrepared - unitsSold);
+
+    var vc = effectiveVarCost(biz, event);
+    var revenue = price * unitsSold;
+    var totalVarCost = vc * unitsPrepared;
+    var totalCost = biz.fixedCost + totalVarCost;
+    var profit = revenue - totalCost;
+    var cm = contributionMargin(biz, price, event);
+    var be = breakEvenUnits(biz, price, event);
+    var mos = be === null ? null : (unitsSold - be);
+
+    var points, verdictLabel, verdictClass, verdictNote;
+    if (cm <= 0){
+      points = 0; verdictLabel = "Not Viable"; verdictClass = "bad";
+      verdictNote = "Your price ("+money(price)+") doesn't even cover the cost of making one "+biz.unit+" ("+money(vc)+"). Every sale loses money before fixed costs are even considered.";
+    } else if (profit <= 0){
+      points = 40; verdictLabel = "Trading At A Loss"; verdictClass = "bad";
+      verdictNote = "You covered part of your costs but didn't reach profit today" + (wasted>0 ? " — unsold stock cost you "+money(wasted*vc)+"." : ".");
+    } else if (mos !== null && mos < 0){
+      points = 70; verdictLabel = "Fragile"; verdictClass = "mid";
+      verdictNote = "You made a small profit, but you sold below your break-even point on paper — a slightly worse day would tip you into a loss.";
+    } else if (mos !== null && be > 0 && mos < be * 0.2){
+      points = 100; verdictLabel = "Viable — Thin Margin"; verdictClass = "mid";
+      verdictNote = "You're above break-even, but only just. Your margin of safety is small, so an unlucky day could still cost you.";
+    } else {
+      points = 150; verdictLabel = "Strongly Viable"; verdictClass = "good";
+      verdictNote = "Comfortably above break-even with room to spare — this is what a financially healthy trading day looks like.";
+    }
+    if (wasted > 0 && points >= 100){
+      verdictNote += " Note: " + wasted + " unsold " + (wasted===1?biz.unit:biz.unitPlural) + " cost you " + money(wasted*vc) + " in wasted stock.";
+    }
+
+    state.scores.push(points);
+    state.roundResults.push({
+      round:state.round, price:price, unitsPrepared:unitsPrepared, actualQty:actualQty,
+      unitsSold:unitsSold, wasted:wasted, revenue:revenue, totalVarCost:totalVarCost,
+      fixedCost:biz.fixedCost, totalCost:totalCost, profit:profit, cm:cm, be:be, mos:mos,
+      points:points, verdictLabel:verdictLabel
+    });
+
+    renderReceipt(verdictLabel, verdictClass, verdictNote);
+  }
+
+  /* ---------- receipt screen ---------- */
+  function renderReceipt(verdictLabel, verdictClass, verdictNote){
+    var biz = state.biz;
+    var r = state.roundResults[state.roundResults.length-1];
+    $("receiptEyebrow").textContent = "End of Trading — Market Day " + (state.round+1);
+
+    var lines = [];
+    lines.push(row("Units prepared", r.unitsPrepared + " " + biz.unitPlural, "sub"));
+    lines.push(row("Units sold", r.unitsSold + " " + biz.unitPlural, "sub"));
+    if (r.wasted > 0) lines.push(row("Unsold stock", r.wasted + " " + biz.unitPlural, "sub"));
+    lines.push(hr());
+    lines.push(row("Revenue (price × sold)", money(r.revenue), "pos"));
+    lines.push(row("Variable costs (× prepared)", "-" + money(r.totalVarCost)));
+    lines.push(row("Fixed costs", "-" + money(r.fixedCost)));
+    lines.push(hr());
+    lines.push(row("Profit / (Loss)", money(r.profit), (r.profit>=0?"pos":"neg") + " total"));
+    lines.push(hr());
+    lines.push(row("Contribution margin / unit", money(r.cm), "sub"));
+    lines.push(row("Break-even point", r.be===null ? "Not achievable" : r.be + " " + biz.unitPlural, "sub"));
+    if (r.be !== null){
+      lines.push(row("Margin of safety", (r.mos>=0?"+":"") + r.mos + " " + biz.unitPlural, "sub"));
+    }
+
+    var html = "";
+    lines.forEach(function(l, idx){ html += l.replace("STYLE_DELAY", (idx*0.05).toFixed(2)); });
+    $("receiptBody").innerHTML = html;
+
+    $("verdictSlot").innerHTML = '<span class="verdict-badge '+verdictClass+'">'+verdictLabel+'</span>';
+    $("verdictNote").textContent = verdictNote;
+
+    $("afterReceiptBtn").onclick = function(){ advanceAfterReceipt(); };
+    showScreen("screen-receipt");
+  }
+  function row(label, val, cls){
+    cls = cls || "";
+    var classes = "r-line " + cls;
+    return '<div class="'+classes+'" style="animation-delay: STYLE_DELAYs;"><span>'+label+'</span><span class="r-amt">'+val+'</span></div>';
+  }
+  function hr(){ return '<hr class="r-rule">'; }
+
+  function advanceAfterReceipt(){
+    if (state.round === 0){
+      showQuiz(0, function(){ nextRound(); });
+    } else if (state.round === 1){
+      showQuiz(1, function(){ nextRound(); });
+    } else {
+      showFinal();
+    }
+  }
+  function nextRound(){
+    state.round += 1;
+    setupRound();
+    showScreen("screen-round");
+  }
+
+  /* ---------- quiz screen ---------- */
+  function showQuiz(index, onDone){
+    var quiz = QUIZZES[index];
+    $("quizQuestion").textContent = quiz.q;
+    var opts = $("quizOpts");
+    opts.innerHTML = "";
+    $("quizFeedback").textContent = "";
+    $("quizNextBtn").style.display = "none";
+
+    quiz.opts.forEach(function(optText, i){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "quiz-opt";
+      b.textContent = optText;
+      b.addEventListener("click", function(){
+        var allOpts = opts.querySelectorAll(".quiz-opt");
+        for (var j=0;j<allOpts.length;j++){ allOpts[j].disabled = true; }
+        if (i === quiz.correct){
+          b.classList.add("correct");
+          state.quizScore += 25;
+          $("quizFeedback").textContent = "Correct — " + quiz.explain;
+        } else {
+          b.classList.add("incorrect");
+          allOpts[quiz.correct].classList.add("correct");
+          $("quizFeedback").textContent = "Not quite — " + quiz.explain;
+        }
+        $("quizNextBtn").style.display = "inline-flex";
+      });
+      opts.appendChild(b);
+    });
+
+    $("quizNextBtn").onclick = function(){ onDone(); };
+    showScreen("screen-quiz");
+  }
+
+  /* ---------- final screen ---------- */
+  function showFinal(){
+    var biz = state.biz;
+    var totalPoints = state.scores.reduce(function(a,b){return a+b;},0) + state.quizScore;
+    var totalProfit = state.roundResults.reduce(function(a,r){return a+r.profit;},0);
+    var anyLossDay = state.roundResults.some(function(r){ return r.profit < 0; });
+
+    $("finalScoreNum").textContent = totalPoints;
+
+    var tier, tierNote, stampClass, stampText;
+    if (totalPoints >= 400){
+      tier = "Viability Master"; stampClass="good"; stampText="VIABLE";
+      tierNote = "Across three very different trading days, "+biz.name+" stayed profitable, above break-even, and resilient to shocks. That's a genuinely financially viable business.";
+    } else if (totalPoints >= 250){
+      tier = "Steady Trader"; stampClass="mid"; stampText="TRADING";
+      tierNote = biz.name+" held its own overall, but at least one day was fragile or thin on margin. A viable business needs to handle bad days too, not just good ones.";
+    } else if (totalPoints >= 100){
+      tier = "Break-even Battler"; stampClass="mid"; stampText="AT RISK";
+      tierNote = biz.name+" only just covered its costs across the three days. One more cost hike or quiet day could push it into a loss — its long-term viability is shaky.";
+    } else {
+      tier = "Back to the Drawing Board"; stampClass="bad"; stampText="NOT VIABLE";
+      tierNote = biz.name+" lost money more often than it made it. Before trading again, rethink your price, your stock levels, or your cost structure.";
+    }
+    $("finalStamp").textContent = stampText;
+    $("finalStamp").className = "stamp " + stampClass;
+    $("finalTitle").textContent = tier;
+
+    var html = "";
+    state.roundResults.forEach(function(r, i){
+      html += row("Day " + (i+1) + " profit / (loss)", money(r.profit), (r.profit>=0?"pos":"neg")).replace("STYLE_DELAY","0");
+    });
+    html += hr().replace("STYLE_DELAY","0");
+    html += row("Total profit, 3 days", money(totalProfit), (totalProfit>=0?"pos total":"neg total")).replace("STYLE_DELAY","0");
+    html += row("Quiz score", state.quizScore + " / 50", "sub").replace("STYLE_DELAY","0");
+    $("finalSummary").innerHTML = html;
+    $("finalVerdictText").textContent = tierNote + (anyLossDay ? " Remember: profit ≠ viability — a business also needs to survive its worst days, not just its best one." : "");
+
+    showScreen("screen-final");
+  }
+
+  $("restartBtn").addEventListener("click", function(){
+    renderBizGrid();
+    showScreen("screen-brief");
+  });
+
+  /* ---------- save results (downloads capability) ---------- */
+  var downloadsNs = null;
+  if (window.claude && typeof window.claude.use === "function"){
+    window.claude.use("downloads").then(function(ns){ downloadsNs = ns; }).catch(function(){ downloadsNs = null; });
+  }
+  $("saveResultsBtn").addEventListener("click", function(){
+    var biz = state.biz;
+    var totalPoints = state.scores.reduce(function(a,b){return a+b;},0) + state.quizScore;
+    var totalProfit = state.roundResults.reduce(function(a,r){return a+r.profit;},0);
+    var lines = [];
+    lines.push("THE BREAK-EVEN STALL — TRADING REPORT");
+    lines.push("=======================================");
+    lines.push("Name: " + state.name);
+    lines.push("Class code: " + state.classCode);
+    lines.push("Business: " + biz.name);
+    lines.push("");
+    state.roundResults.forEach(function(r, i){
+      lines.push("Day " + (i+1) + ":");
+      lines.push("  Price: " + money(r.price) + "   Prepared: " + r.unitsPrepared + "   Sold: " + r.unitsSold + "   Unsold: " + r.wasted);
+      lines.push("  Revenue: " + money(r.revenue) + "   Total costs: " + money(r.totalCost) + "   Profit/(Loss): " + money(r.profit));
+      lines.push("  Contribution margin: " + money(r.cm) + "/unit   Break-even: " + (r.be===null?"not achievable":r.be+" units") + "   Margin of safety: " + (r.mos===null?"n/a":r.mos+" units"));
+      lines.push("  Result: " + r.verdictLabel);
+      lines.push("");
+    });
+    lines.push("Total profit across 3 days: " + money(totalProfit));
+    lines.push("Quiz score: " + state.quizScore + " / 50");
+    lines.push("Total score: " + totalPoints + " / 500");
+    lines.push("");
+    lines.push("Reflection:");
+    lines.push($("reflectBox").value.trim() || "(no reflection entered)");
+    var content = lines.join("\n");
+
+    $("saveError").textContent = "";
+    if (!downloadsNs){
+      $("saveError").textContent = "Saving isn't available in this view — copy your results from the till roll above instead.";
+      return;
+    }
+    var filename = "break-even-stall-" + (state.name || "student").toLowerCase().replace(/[^a-z0-9]+/g,"-") + ".txt";
+    downloadsNs.save({ filename: filename, data: content }).then(function(){
+      $("saveError").textContent = "";
+    }).catch(function(err){
+      if (err && err.code === "declined"){ return; }
+      $("saveError").textContent = "Couldn't save the file right now — try again in a moment.";
+    });
+  });
+
+  /* ---------- handbook drawer ---------- */
+  function openDrawer(){
+    $("handbookDrawer").classList.add("open");
+    $("handbookDrawer").setAttribute("aria-hidden","false");
+    $("drawerBackdrop").classList.add("open");
+  }
+  function closeDrawer(){
+    $("handbookDrawer").classList.remove("open");
+    $("handbookDrawer").setAttribute("aria-hidden","true");
+    $("drawerBackdrop").classList.remove("open");
+  }
+  $("handbookOpenBtn").addEventListener("click", openDrawer);
+  $("handbookCloseBtn").addEventListener("click", closeDrawer);
+  $("drawerBackdrop").addEventListener("click", closeDrawer);
+
+})();
+</script>
